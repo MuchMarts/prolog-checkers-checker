@@ -34,6 +34,7 @@ piece_at(Board, Col, Row, Color, Type) :-
     member(piece(Color, Type, Col, Row), Board).
 
 empty_square(Board, Col, Row) :-
+    valid_square(Col, Row),
     \+ piece_at(Board, Col, Row, _, _).
 
 oponent(white, black).
@@ -97,20 +98,38 @@ valid_man_capture(Board, Player, Col1, Row1, Col2, Row2) :-
 
 % base case
 valid_chain_capture(Board, Player, [(Col1,Row1), (Col2,Row2)]) :-
-    valid_man_capture(Board, Player, Col1, Row1, Col2, Row2).
+    valid_man_capture(Board, Player, Col1, Row1, Col2, Row2),
+    middle_square(Col1, Row1, Col2, Row2, MidCol, MidRow),
+    oponent(Player, Oponent),
+    piece_at(Board, MidCol, MidRow, Oponent, Type),
+    % Remove captures piece
+	select(piece(Oponent, Type, MidCol, MidRow), Board, TempBoard),
+    % Remove old piece
+    piece_at(Board, Col1, Row1, Player, MyType),
+    select(piece(Player, MyType, Col1, Row1), TempBoard, TempBoard2),
+    NewBoard = [piece(Player, queen, Col2, Row2) | TempBoard2],
+    \+ capture_available(NewBoard, Player).
 
 valid_chain_capture(Board, Player, [(Col1,Row1), (Col2,Row2) | Rest]) :-
     valid_man_capture(Board, Player, Col1, Row1, Col2, Row2),
     middle_square(Col1, Row1, Col2, Row2, MidCol, MidRow),
     oponent(Player, Oponent),
     piece_at(Board, MidCol, MidRow, Oponent, Type),
-	select(piece(Oponent, Type, MidCol, MidRow), Board, NewBoard),
+    % Remove captures piece
+	select(piece(Oponent, Type, MidCol, MidRow), Board, TempBoard),
+    % Remove old piece
+    piece_at(Board, Col1, Row1, Player, MyType),
+    select(piece(Player, MyType, Col1, Row1), TempBoard, TempBoard2),
+    
     % check if promoted
     ( should_promote(Player, Row2)
-    -> % becomes queen, continue as queen chain
-       valid_queen_chain_capture(NewBoard, Player, [(Col2,Row2) | Rest])
-    ;  % stays man, continue as man chain
-       valid_chain_capture(NewBoard, Player, [(Col2,Row2) | Rest])
+    -> 
+    % becomes queen, continue as queen chain        
+        NewBoard = [piece(Player, queen, Col2, Row2) | TempBoard2],
+       	valid_queen_chain_capture(NewBoard, Player, [(Col2,Row2) | Rest]);  	
+    % stays man, continue as man chain
+        NewBoard = [piece(Player, MyType, Col2, Row2) | TempBoard2],
+       	valid_chain_capture(NewBoard, Player, [(Col2,Row2) | Rest])
     ).
 
 squares_empty(_, []).
@@ -170,8 +189,14 @@ valid_queen_chain_capture(Board, Player, [(Col1,Row1), (Col2,Row2) | Rest]) :-
     member(ColDir, [-1, 1]),
     member(RowDir, [-1, 1]),
     find_opponent_on_diagonal(Board, Player, Col1, Row1, ColDir, RowDir, OppCol, OppRow),
+    % Remove captures piece
     piece_at(Board, OppCol, OppRow, Oponent, Type),
-    select(piece(Oponent, Type, OppCol, OppRow), Board, NewBoard),
+	select(piece(Oponent, Type, OppCol, OppRow), Board, TempBoard),
+    % Remove old piece
+    piece_at(Board, Col1, Row1, Player, MyType),
+    select(piece(Player, MyType, Col1, Row1), TempBoard, TempBoard2),
+    NewBoard = [piece(Player, MyType, Col2, Row2) | TempBoard2],
+    
     valid_queen_chain_capture(NewBoard, Player, [(Col2, Row2) | Rest]).
 
 capture_available(Board, Player) :-
