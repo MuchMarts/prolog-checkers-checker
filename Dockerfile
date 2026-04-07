@@ -9,4 +9,4 @@ RUN pip install pyswip
 WORKDIR /app
 COPY . .
 
-CMD ["python", "main.py"]
+ENTRYPOINT [ "python", "main.py" ]

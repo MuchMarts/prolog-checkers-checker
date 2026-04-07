@@ -1,6 +1,7 @@
 from pyswip import Prolog
 from test_cases import tests as TEST_CASES
 from modules import Board, Piece
+import argparse
 
 prolog = Prolog()
 prolog.consult("checkers_checker.pl")
@@ -29,8 +30,7 @@ def run_test(name, board, player, move, expected):
         print(f"       Move: {move}")
     return passed
 
-
-if __name__ == "__main__":
+def run_tests():
     passed = 0
     failed = 0
 
@@ -47,4 +47,27 @@ if __name__ == "__main__":
             print(f"[ERROR] {name}: {e}")
             failed += 1
 
-    print(f"\nResults: {passed} passed, {failed} failed out of {passed + failed} tests")
+    print(f"\nResults: {passed} passed, {failed} failed out of {passed + failed}")
+
+
+def run_app():
+    print("Running normal app mode...")
+    board = Board()
+    print(board.to_string())
+    
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--mode",
+        choices=["test", "run"],
+        default="run",
+        help="Execution mode"
+    )
+
+    args = parser.parse_args()
+
+    if args.mode == "test":
+        run_tests()
+    else:
+        run_app()
