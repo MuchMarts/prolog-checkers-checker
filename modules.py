@@ -55,10 +55,18 @@ class Board:
         cell_w = "---"
         cell_h = "|"
         board_str = ""
-        
+
+        board_str += "   "
+        for i in range (1,9):
+            board_str += f"  {i} "
+        board_str += "\n"
+
         for row in range(1, 9):
+            board_str += "   "
             board_str += cell_h + (cell_w + cell_h) * 8
             board_str += "\n"
+            
+            board_str += f" {row} "
             board_str += cell_h
             for col in range(1, 9):
                 indicator = " "
@@ -80,3 +88,58 @@ class Board:
 
         return board_str
 
+    def update_moves(self, moves: str):
+        """
+        moves format:
+        "(c1,r1),(c2,r2),(c3,r3)..."
+        """
+
+        # 1. Parse input string into list of tuples
+        coords = []
+        parts = moves.strip().split("),")
+        for part in parts:
+            part = part.replace("(", "").replace(")", "").strip()
+            col, row = map(int, part.split(","))
+            coords.append((col, row))
+
+        if len(coords) < 2:
+            return  # nothing to do
+
+        # 2. Get the piece at starting position
+        start_col, start_row = coords[0]
+        piece = self.pieces_kvp.get((start_col, start_row))
+
+        if not piece:
+            raise ValueError("No piece at starting position")
+
+        # Remove from old position
+        del self.pieces_kvp[(start_col, start_row)]
+
+        # 3. Process each move step
+        for i in range(1, len(coords)):
+            prev_col, prev_row = coords[i - 1]
+            new_col, new_row = coords[i]
+
+            # 4. Detect capture (jump = distance 2)
+            if abs(new_col - prev_col) == 2 and abs(new_row - prev_row) == 2:
+                mid_col = (prev_col + new_col) // 2
+                mid_row = (prev_row + new_row) // 2
+
+                captured_piece = self.pieces_kvp.get((mid_col, mid_row))
+                if captured_piece:
+                    self.pieces.remove(captured_piece)
+                    del self.pieces_kvp[(mid_col, mid_row)]
+
+        # 5. Update piece position to final square
+        final_col, final_row = coords[-1]
+        piece.update_pos(final_col, final_row)
+
+            # 6. Promotion (kinging)
+        if piece.piece_type == "man":
+            if piece.color == "white" and final_row == 1:
+                piece.piece_type = "queen"
+            elif piece.color == "black" and final_row == 8:
+                piece.piece_type = "queen"
+
+        # Reinsert piece
+        self.pieces_kvp[(final_col, final_row)] = piece

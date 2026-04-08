@@ -44,8 +44,8 @@ is_oponent_piece(Board, Player, Col, Row) :-
     oponent(Player, Oponent),
     piece_at(Board, Col, Row, Oponent, _).
 
-forward_direction(white, 1).
-forward_direction(black, -1).
+forward_direction(white, -1).
+forward_direction(black, 1).
 
 is_diagonal(Col1, Row1, Col2, Row2) :-
     ColDiff is abs(Col1 - Col2),

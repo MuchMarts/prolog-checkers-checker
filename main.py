@@ -2,6 +2,7 @@ from pyswip import Prolog
 from test_cases import tests as TEST_CASES
 from modules import Board, Piece
 import argparse
+import time
 
 prolog = Prolog()
 prolog.consult("checkers_checker.pl")
@@ -11,11 +12,17 @@ def move_to_prolog(move):
     squares = [f"({col},{row})" for col, row in move]
     return "[" + ", ".join(squares) + "]"
 
+def input_move_to_prolog(move):
+    return "[" + move + "]"
 
 def verify_move(board: Board, player, move):
     board_str = board.to_prolog()
-    move_str = move_to_prolog(move)
+    if type(move) == str:
+        move_str = input_move_to_prolog(move)
+    else:
+        move_str = move_to_prolog(move)
     query = f"valid_move({board_str}, {player}, {move_str})"
+    print(query)
     return bool(list(prolog.query(query)))
 
 
@@ -53,8 +60,25 @@ def run_tests():
 def run_app():
     print("Running normal app mode...")
     board = Board()
-    print(board.to_string())
-    
+    print("Enter move in this format (1,1),(2,2); (Col, Row) First the piece you are moving, Then position to which you are moving. ")
+    time.sleep(2)
+
+    player = "white"
+
+    while (True):
+        print(board.to_string())
+        print("-----------------------------------------")
+        print(f"Player: {player}")
+        moves = input("Enter moves: ")
+        valid = verify_move(board=board, player=player, move=moves)
+        print(f"Valid move: {valid}")
+        if not valid: continue
+        
+        board.update_moves(moves)
+        if player == "white":
+            player = "black"
+        else:
+            player = "white"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
