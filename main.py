@@ -22,7 +22,7 @@ def verify_move(board: Board, player, move):
     else:
         move_str = move_to_prolog(move)
     query = f"valid_move({board_str}, {player}, {move_str})"
-    print(query)
+    #print(query)
     return bool(list(prolog.query(query)))
 
 

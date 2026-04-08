@@ -8,24 +8,24 @@ def make_board(*pieces):
 tests = [
     # Basic man movement
     (
-        "white man valid forward move",
-        make_board(("white", "man", 2, 2)),
-        "white", [(2,2),(3,3)], True
-    ),
-    (
         "black man valid forward move",
-        make_board(("black", "man", 4, 4)),
-        "black", [(4,4),(3,3)], True
+        make_board(("black", "man", 2, 2)),
+        "black", [(2,2),(3,3)], True
     ),
     (
-        "white man invalid backward move",
+        "white man valid forward move",
         make_board(("white", "man", 4, 4)),
-        "white", [(4,4),(3,3)], False
+        "white", [(4,4),(3,3)], True
     ),
     (
         "black man invalid backward move",
         make_board(("black", "man", 4, 4)),
-        "black", [(4,4),(5,5)], False
+        "black", [(4,4),(3,3)], False
+    ),
+    (
+        "white man invalid backward move",
+        make_board(("white", "man", 4, 4)),
+        "white", [(4,4),(5,5)], False
     ),
     (
         "man blocked destination",
@@ -97,18 +97,18 @@ tests = [
     # Promotion
     (
         "man reaches back row",
-        make_board(("white", "man", 3, 7)),
-        "white", [(3,7),(4,8)], True
+        make_board(("black", "man", 3, 7)),
+        "black", [(3,7),(4,8)], True
     ),
     (
         "man captures onto back row",
-        make_board(("white", "man", 2, 6), ("black", "man", 3, 7)),
-        "white", [(2,6),(4,8)], True
+        make_board(("black", "man", 2, 6), ("white", "man", 3, 7)),
+        "black", [(2,6),(4,8)], True
     ),
     (
         "man promotes mid chain continues as queen",
-        make_board(("white", "man", 2, 6), ("black", "man", 3, 7), ("black", "man", 5, 7)),
-        "white", [(2,6),(4,8),(8,4)], True
+        make_board(("black", "man", 2, 6), ("white", "man", 3, 7), ("white", "man", 5, 7)),
+        "black", [(2,6),(4,8),(8,4)], True
     ),
 
     # Queen movement

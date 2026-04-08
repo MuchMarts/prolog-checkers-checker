@@ -24,8 +24,8 @@ dark_square(Col, Row) :-
     valid_square(Col, Row),
     0 is (Col + Row) mod 2.
 
-back_row(white, 8).
-back_row(black, 1).
+back_row(white, 1).
+back_row(black, 8).
 
 should_promote(Player, Row) :-
     back_row(Player, Row).
