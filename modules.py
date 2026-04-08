@@ -51,6 +51,33 @@ class Board:
     def __repr__(self):
         return self.to_prolog()
     
+    def has_won(self, player:str):
+        if player not in ["white", "black"]: 
+            print("INCORRECT PLAYER")
+            return
+        opp_counter = 0
+        player_counter = 0
+        opp = ""
+        if player == "white":
+            opp = "black"
+        else:
+            opp = "white"
+        
+        for p in self.pieces:
+            if p.color == opp:
+                opp_counter +=1
+            else: 
+                player_counter += 1
+
+        if player_counter == 0:
+            print(f"Opponent {opp} has won!")
+            return 1
+        elif opp_counter == 0:
+            print(f"You {player} won!")
+            return 1
+        
+        return 0
+
     def to_string(self):
         cell_w = "---"
         cell_h = "|"
@@ -105,14 +132,9 @@ class Board:
         if len(coords) < 2:
             return  # nothing to do
 
-        # Get the piece at starting position
         start_col, start_row = coords[0]
         piece = self.pieces_kvp.get((start_col, start_row))
-
-        if not piece:
-            raise ValueError("No piece at starting position")
-
-        # Remove from old position
+        if not piece: raise ValueError("No piece at starting position")
         del self.pieces_kvp[(start_col, start_row)]
 
         # Process each move step
@@ -125,17 +147,26 @@ class Board:
                     piece.piece_type = "queen"
                 elif piece.color == "black" and new_row == 8:
                     piece.piece_type = "queen"
+            
+            delta_col = new_col - prev_col
+            delta_row = new_row - prev_row
+            col_negative = False
+            row_negative = False
+            
+            if delta_col < 0: col_negative = True
+            if delta_row < 0: row_negative = True
 
-            # Detect capture
-            if abs(new_col - prev_col) == 2 and abs(new_row - prev_row) == 2:
-                mid_col = (prev_col + new_col) // 2
-                mid_row = (prev_row + new_row) // 2
+            # Remove *captured* pieces
+            for d_row in range(abs(delta_row)):
+                for d_col in range(abs(delta_col)):
+                    calculated_col = prev_col + (d_col + 1) * (-1 if col_negative else 1)
+                    calculated_row = prev_row + (d_row + 1) * (-1 if row_negative else 1)
 
-                captured_piece = self.pieces_kvp.get((mid_col, mid_row))
-                if captured_piece:
-                    self.pieces.remove(captured_piece)
-                    del self.pieces_kvp[(mid_col, mid_row)]
-             
+                    captured_piece = self.pieces_kvp.get((calculated_col, calculated_row))
+                    if captured_piece:
+                        self.pieces.remove(captured_piece)
+                        del self.pieces_kvp[(calculated_col, calculated_row)]
+  
         # Update piece position to final square
         final_col, final_row = coords[-1]
         piece.update_pos(final_col, final_row)

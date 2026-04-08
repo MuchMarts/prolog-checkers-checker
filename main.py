@@ -75,11 +75,18 @@ def run_app():
         if not valid: continue
         
         board.update_moves(moves)
+
+        game_ended = board.has_won(player=player)
+
+        if game_ended:
+            break
+
         if player == "white":
             player = "black"
         else:
             player = "white"
 
+    print("Game over! Thank you for playing")
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
