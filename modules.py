@@ -134,12 +134,11 @@ class Board:
         final_col, final_row = coords[-1]
         piece.update_pos(final_col, final_row)
 
-            # 6. Promotion (kinging)
+        # 6. Promotion
         if piece.piece_type == "man":
             if piece.color == "white" and final_row == 1:
                 piece.piece_type = "queen"
             elif piece.color == "black" and final_row == 8:
                 piece.piece_type = "queen"
 
-        # Reinsert piece
         self.pieces_kvp[(final_col, final_row)] = piece
